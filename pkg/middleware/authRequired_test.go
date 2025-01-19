@@ -1,8 +1,7 @@
-package middleware_test
+package middleware
 
 import (
 	"fmt"
-	"github.com/mert-yigittop/cxp-api-starter/pkg/middleware"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -28,29 +27,24 @@ func TestAuthRequired(t *testing.T) {
 	// Create a mock JWT service
 	mockJWTService := new(MockJWTService)
 
-	// Mock the Verify function to return a valid user ID
-	mockJWTService.On("Verify", "valid_token").Return(uint(123), nil)
-
 	// Middleware'ı kullanacak bir route oluştur
 	app.Use(func(c *fiber.Ctx) error {
-		return middleware.AuthRequired()(c)
-	})
-
-	app.Get("/protected", func(c *fiber.Ctx) error {
-		// UserId'yi kontrol et
-		userId := c.Locals("userId")
-		assert.Equal(t, uint(123), userId)
-		return c.SendString("Success")
+		// Mock servis kullanarak AuthRequired fonksiyonunu çalıştırıyoruz
+		return AuthRequired()(c)
 	})
 
 	// Test valid token
 	t.Run("Valid Token", func(t *testing.T) {
+		// Mock the Verify function to return a valid user ID
+		mockJWTService.On("Verify", "valid_token").Return(uint(123), nil)
+
 		// Create a mock request with a valid JWT cookie
 		req := httptest.NewRequest("GET", "/protected", nil)
 		req.AddCookie(&http.Cookie{Name: "jwt", Value: "valid_token"})
 		resp, _ := app.Test(req)
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		mockJWTService.AssertExpectations(t)
 	})
 
 	// Test invalid token
@@ -61,6 +55,16 @@ func TestAuthRequired(t *testing.T) {
 		// Create a mock request with an invalid JWT cookie
 		req := httptest.NewRequest("GET", "/protected", nil)
 		req.AddCookie(&http.Cookie{Name: "jwt", Value: "invalid_token"})
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+		mockJWTService.AssertExpectations(t)
+	})
+
+	// Test missing token
+	t.Run("Missing Token", func(t *testing.T) {
+		// Create a mock request without JWT cookie
+		req := httptest.NewRequest("GET", "/protected", nil)
 		resp, _ := app.Test(req)
 
 		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
