@@ -1,52 +1,102 @@
-package repository_test
+package repository
 
 import (
 	"context"
 	"testing"
 
+	"github.com/mert-yigittop/cxp-api-starter/internal/todo/dto"
 	"github.com/mert-yigittop/cxp-api-starter/internal/todo/entity"
-	"github.com/mert-yigittop/cxp-api-starter/internal/todo/repository"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-func setupPostgresTestDB() *gorm.DB {
-	dsn := "host=localhost user=postgres password=password dbname=todo port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect to PostgreSQL database")
-	}
+func TestTodoRepository(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	assert.NoError(t, err)
 
-	// Migrate the schema
 	err = db.AutoMigrate(&entity.Todo{})
-	if err != nil {
-		panic("failed to migrate database")
-	}
-
-	return db
-}
-
-func TestPostgresRepository_Create(t *testing.T) {
-	db := setupPostgresTestDB()
-	repo := repository.New(db)
-
-	ctx := context.Background()
-	todo := entity.Todo{
-		Content:   "Test todo",
-		Completed: false,
-		UserID:    1,
-	}
-
-	resp, err := repo.Create(ctx, todo)
-
 	assert.NoError(t, err)
-	assert.Equal(t, todo.Content, resp.Content)
-	assert.Equal(t, todo.Completed, resp.Completed)
 
-	// Verify data in DB
-	var savedTodo entity.Todo
-	err = db.First(&savedTodo, resp.ID).Error
-	assert.NoError(t, err)
-	assert.Equal(t, "Test todo", savedTodo.Content)
+	repo := New(db)
+
+	t.Run("Create Todo", func(t *testing.T) {
+		todo := entity.Todo{
+			Content:   "Test Todo",
+			Completed: false,
+			UserID:    1,
+		}
+
+		resp, err := repo.Create(context.Background(), todo)
+		assert.NoError(t, err)
+		assert.NotZero(t, resp.ID)
+		assert.Equal(t, "Test Todo", resp.Content)
+		assert.False(t, resp.Completed)
+	})
+
+	t.Run("Get Todo List", func(t *testing.T) {
+		payload := dto.GetTodoListRequest{
+			UserID: 1,
+		}
+
+		resp, err := repo.GetList(context.Background(), payload)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, resp.Todos)
+		assert.Equal(t, 1, len(resp.Todos))
+	})
+
+	t.Run("Update Todo", func(t *testing.T) {
+		payload := dto.UpdateTodoRequest{
+			ID:        1,
+			Content:   "Updated Todo",
+			Completed: true,
+		}
+
+		resp, err := repo.Update(context.Background(), payload, 1)
+		assert.NoError(t, err)
+		assert.Equal(t, uint(1), resp.ID)
+		assert.Equal(t, "Updated Todo", resp.Content)
+		assert.True(t, resp.Completed)
+	})
+
+	t.Run("Update Todo - Unauthorized", func(t *testing.T) {
+		payload := dto.UpdateTodoRequest{
+			ID:        1,
+			Content:   "Another Update",
+			Completed: true,
+		}
+
+		_, err := repo.Update(context.Background(), payload, 2)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not authorized")
+	})
+
+	t.Run("Delete Todo", func(t *testing.T) {
+		payload := dto.DeleteTodoRequest{
+			ID: 1,
+		}
+
+		resp, err := repo.Delete(context.Background(), payload, 1)
+		assert.NoError(t, err)
+		assert.Equal(t, uint(1), resp.ID)
+	})
+
+	t.Run("Delete Todo - Unauthorized", func(t *testing.T) {
+		todo := entity.Todo{
+			Content:   "Unauthorized Test Todo",
+			Completed: false,
+			UserID:    1,
+		}
+		err := db.Create(&todo).Error
+		assert.NoError(t, err)
+
+		payload := dto.DeleteTodoRequest{
+			ID: todo.ID,
+		}
+
+		_, err = repo.Delete(context.Background(), payload, 2)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not authorized")
+	})
+
 }

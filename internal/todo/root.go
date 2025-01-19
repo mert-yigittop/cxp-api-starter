@@ -23,7 +23,7 @@ func Setup(router fiber.Router, db *gorm.DB) {
 	handler := todoHandler.New(usecase)
 
 	// Routes
-	route := router.Group("/todo", middleware.AuthRequired())
+	route := router.Group("/todos", middleware.AuthRequired())
 
 	route.Get("/", handler.GetList)
 	route.Post("/", handler.Create)

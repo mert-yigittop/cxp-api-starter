@@ -107,14 +107,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/todo",
+							"raw": "{{baseUrl}}/api/v1/todos",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"todo"
+								"todos"
 							]
 						}
 					},
@@ -126,14 +126,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/todo",
+							"raw": "{{baseUrl}}/api/v1/todos",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"todo"
+								"todos"
 							]
 						}
 					},
@@ -154,14 +154,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/todo/1",
+							"raw": "{{baseUrl}}/api/v1/todos/1",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"todo",
+								"todos",
 								"1"
 							]
 						}
