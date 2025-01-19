@@ -25,7 +25,6 @@ func TestTodoHandler(t *testing.T) {
 	app.Put("/todos/:id", handler.Update)
 	app.Delete("/todos/:id", handler.Delete)
 
-	// Simulate user ID in locals
 	app.Use(func(c *fiber.Ctx) error {
 		c.Locals("userId", uint(1))
 		return c.Next()

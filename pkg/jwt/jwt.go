@@ -13,15 +13,12 @@ var (
 )
 
 func Sign(userId uint, expirationTime time.Duration) (string, error) {
-	// Create a new token object
 	token := jwt.New(jwt.SigningMethodHS256)
 
-	// Set the claims for the token
 	claims := token.Claims.(jwt.MapClaims)
 	claims["userId"] = userId
 	claims["exp"] = time.Now().Add(expirationTime).Unix()
 
-	// Sign the token with a secret key
 	signedToken, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		return "", err

@@ -15,11 +15,8 @@ func AuthRequired() fiber.Handler {
 			return response.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
 		}
 
-		// Token'ı "Bearer token" formatından ayıkla
-		//tokenString := jwtCookie[7:]
 		tokenString := jwtCookie
 
-		// Token'ı doğrula
 		userId, err := jwt.Verify(tokenString)
 		if err != nil {
 			return response.ErrorResponse(c, http.StatusUnauthorized, fmt.Sprintf("Unauthorized: %v", err.Error()))
