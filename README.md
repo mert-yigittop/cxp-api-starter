@@ -2,7 +2,7 @@
 
 ## Installation
 
-Pull this repo and follow the steps below
+>Pull this repo and follow the steps below
 
 ```bash
   git clone https://github.com/mert-yigittop/cxp-api-starter.git
@@ -16,6 +16,13 @@ Pull this repo and follow the steps below
   make up-dev
 ```
 
+---
+
+> To see app metrics go to:
+```bash
+    http://localhost:8080/metrics
+```
+
 ## API
 
-Import the **CXP-API-STARTER.postman_collection.json** file to the Postman application to perform API tests.
+>Import the **CXP-API-STARTER.postman_collection.json** file to the Postman application to perform API tests.
