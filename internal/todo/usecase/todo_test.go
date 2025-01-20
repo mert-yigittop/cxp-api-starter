@@ -4,38 +4,15 @@ import (
 	"context"
 	"github.com/mert-yigittop/cxp-api-starter/internal/todo/dto"
 	"github.com/mert-yigittop/cxp-api-starter/internal/todo/entity"
+	"github.com/mert-yigittop/cxp-api-starter/internal/todo/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"net/http"
 	"testing"
 )
 
-type MockRepository struct {
-	mock.Mock
-}
-
-func (m *MockRepository) GetList(ctx context.Context, payload dto.GetTodoListRequest) (dto.GetTodoListResponse, error) {
-	args := m.Called(ctx, payload)
-	return args.Get(0).(dto.GetTodoListResponse), args.Error(1)
-}
-
-func (m *MockRepository) Create(ctx context.Context, payload entity.Todo) (dto.CreateTodoResponse, error) {
-	args := m.Called(ctx, payload)
-	return args.Get(0).(dto.CreateTodoResponse), args.Error(1)
-}
-
-func (m *MockRepository) Update(ctx context.Context, payload dto.UpdateTodoRequest, userId uint) (dto.UpdateTodoResponse, error) {
-	args := m.Called(ctx, payload, userId)
-	return args.Get(0).(dto.UpdateTodoResponse), args.Error(1)
-}
-
-func (m *MockRepository) Delete(ctx context.Context, payload dto.DeleteTodoRequest, userId uint) (dto.DeleteTodoResponse, error) {
-	args := m.Called(ctx, payload, userId)
-	return args.Get(0).(dto.DeleteTodoResponse), args.Error(1)
-}
-
 func TestUsecase_GetList(t *testing.T) {
-	mockRepo := new(MockRepository)
+	mockRepo := new(mocks.MockRepository)
 	usecase := New(mockRepo)
 
 	todoList := dto.GetTodoListResponse{
@@ -58,7 +35,7 @@ func TestUsecase_GetList(t *testing.T) {
 }
 
 func TestUsecase_Create(t *testing.T) {
-	mockRepo := new(MockRepository)
+	mockRepo := new(mocks.MockRepository)
 	usecase := New(mockRepo)
 
 	todo := entity.Todo{
@@ -83,7 +60,7 @@ func TestUsecase_Create(t *testing.T) {
 }
 
 func TestUsecase_Update(t *testing.T) {
-	mockRepo := new(MockRepository)
+	mockRepo := new(mocks.MockRepository)
 	usecase := New(mockRepo)
 
 	updateRequest := dto.UpdateTodoRequest{
@@ -109,7 +86,7 @@ func TestUsecase_Update(t *testing.T) {
 }
 
 func TestUsecase_Delete(t *testing.T) {
-	mockRepo := new(MockRepository)
+	mockRepo := new(mocks.MockRepository)
 	usecase := New(mockRepo)
 
 	deleteRequest := dto.DeleteTodoRequest{ID: 1}
